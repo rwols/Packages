@@ -808,30 +808,99 @@ contexts:
     - match: '(?=\S)'
       pop: true
 
+  function-definition-params-exit:
+    - include: comments
+    - match: (?=\s*\))
+      set:
+        - meta_scope: meta.function.parameters.c++ meta.group.c++
+        - match: \)
+          scope: punctuation.section.group.end.c++
+          set: function-definition-continue
+
+  function-definition-params-argument-type:
+    - meta_content_scope: meta.function.parameters.c++ meta.group.c++ meta.argument-type.c++
+    - include: function-definition-params-exit
+    - include: modifiers # const, volatile and maybe others.
+    - include: brackets # For C-Style arrays.
+    - include: function-call # For macros.
+    - match: '{{basic_types}}'
+      scope: storage.type.c++
+      set: function-definition-params-argument-type-modifiers
+    - match: '{{identifier}}'
+      set: function-definition-params-argument-type-modifiers
+    # At this point one could detect invalid storage modifiers now, but I'll
+    # leave it commented because macros might get in the way.
+    # - match: '[*&]'
+    #   scope: invalid.illegal.stray-modifiers.c++
+    # The comma is handled in function-definition-params-argument-name-maybe-assignment,
+    # so it's possible to detect a stray comma now. I'll leave this commented
+    # because macros might get in the way of parsing.
+    # - match: ','
+    #   scope: invalid.illegal.stray-comma.c++
+
+  function-definition-params-argument-type-modifiers:
+    - meta_content_scope: meta.function.parameters.c++ meta.group.c++ meta.argument-type.c++
+    - include: function-definition-params-exit
+    - include: modifiers # const, volatile and maybe others.
+    - include: function-call # For macros.
+    - include: angle-brackets # For template argument types.
+    - match: \*
+      scope: storage.modifier.pointer.c++
+    - match: \&
+      scope: storage.modifier.reference.c++
+    - match: (?={{identifier}})
+      set: function-definition-params-argument-name
+    - match: ','
+      scope: punctuation.separator.c++
+      set: function-definition-params-argument-type
+
+  function-definition-params-argument-name:
+    - meta_content_scope: meta.function.parameters.c++ meta.group.c++
+    - include: function-definition-params-exit
+    - include: function-call # For macros.
+    - match: '{{identifier}}'
+      scope: variable.parameter.c++
+      set: function-definition-params-argument-name-maybe-assignment
+    - match: ','
+      scope: punctuation.separator.c++
+      set: function-definition-params-argument-type
+    - match: (?=\))
+      set: function-definition-params-argument-type
+    - include: expressions-minus-generic-type
+
+
+  function-definition-params-argument-name-maybe-assignment:
+    - meta_content_scope: meta.function.parameters.c++ meta.group.c++
+    - include: function-definition-params-exit
+    - include: brackets # For C-Style arrays.
+    - include: function-call # For macros.
+    - match: '='
+      scope: keyword.operator.assignment.default.c++
+      set:
+        - meta_content_scope: meta.function.parameters.c++ meta.group.c++
+        - match: (?=[,)])
+          set: function-definition-params-argument-type
+        - include: expressions-minus-generic-type
+    - match: ','
+      scope: punctuation.separator.c++
+      set: function-definition-params-argument-type
+
+
   function-definition-params:
     - meta_content_scope: meta.function.c++
     - include: comments
     - match: '(?=\()'
       set:
+        # The idea here is to ping-pong the context stack between an argument's
+        # type and an argument's name. The relevant contexts are:
+        # * function-definition-params-exit
+        # * function-definition-params-argument-type
+        # * function-definition-params-argument-type-modifiers
+        # * function-definition-params-argument-name
+        # * function-definition-params-argument-name-maybe-assignment
         - match: \(
           scope: meta.function.parameters.c++ meta.group.c++ punctuation.section.group.begin.c++
-          set:
-            - meta_content_scope: meta.function.parameters.c++ meta.group.c++
-            - match : \)
-              scope: punctuation.section.group.end.c++
-              set: function-definition-continue
-            - include: types
-            - include: function-call
-            # Don't do a lookahead for a "," or a ")" as it's unreliable
-            - match: '{{identifier}}'
-              scope: variable.parameter.c++
-            - match: '='
-              scope: keyword.operator.assignment.c++
-              push:
-                - match: '(?=,|\))'
-                  pop: true
-                - include: expressions-minus-generic-type
-            - include: expressions-minus-generic-type
+          set: function-definition-params-argument-type
     - match: (?=\S)
       pop: true
 

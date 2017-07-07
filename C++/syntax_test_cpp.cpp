@@ -920,11 +920,13 @@ long double operator "" _km (long double x);
 /*          ^^^^^^^^^^^^^^^ entity.name.function */
 
 void f(int x);
+/*       ^ storage.type - variable.parameter */
 /*         ^ variable.parameter */
 
 void 
 f(
     int x
+    /*^ storage.type - variable.parameter */
     /*  ^ variable.parameter */
 );
 
@@ -934,6 +936,147 @@ SomeFunction(
     bool someBool,
     float someFloat
     /*    ^ variable.parameter */
+);
+
+void SomeFunction(
+    const X x,
+    /*    ^ meta.argument-type */
+    /*      ^ variable.parameter */
+    Y& y,
+    /* <- meta.argument-type */
+     /* <- storage.modifier */
+    /* ^ variable.parameter */
+    const volatile Z* z
+    /*  ^ storage.modifier */
+    /*           ^ storage.modifier */
+    /*             ^ meta.argument-type */
+    /*              ^ storage.modifier */
+    /*                ^ variable.parameter */
+);
+/* <- meta.function.parameters meta.group punctuation.section.group.end */
+ /* <- punctuation.terminator */
+
+struct X{};
+void f(const X x);
+/*     ^ storage.modifier - variable.parameter */
+/*           ^ meta.argument-type */
+/*             ^ variable.parameter */
+void f(X * const x = 5);
+/*     ^ meta.argument-type - variable.parameter */
+/*               ^ variable.parameter */
+/*                 ^ keyword.operator */
+/*                   ^ constant.numeric */
+void f(X& x);
+/*     ^ meta.argument-type - variable.parameter */
+/*      ^ storage.modifier */
+/*        ^ variable.parameter */
+void f(const X& x);
+/*         ^ storage.modifier - variable.parameter */
+/*           ^ meta.argument-type */
+/*            ^ storage.modifier */
+/*              ^ variable.parameter */
+void f(int x);
+/*       ^ storage.type - variable.parameter */
+/*         ^ variable.parameter */
+void f(int);
+/*       ^ meta.function.parameters meta.group meta.argument-type storage.type */
+/*        ^ meta.function.parameters meta.group punctuation.section.group.end */
+void f(const int);
+/*         ^ meta.function.parameters meta.group meta.argument-type storage.modifier */
+/*             ^ meta.function.parameters meta.group meta.argument-type storage.type */
+void f(int const*);
+/*       ^ meta.function.parameters meta.group meta.argument-type storage.type */
+/*             ^ meta.function.parameters meta.group meta.argument-type storage.modifier */
+/*              ^ meta.function.parameters meta.group meta.argument-type storage.modifier.pointer */
+void f(const int&);
+/*         ^ meta.function.parameters meta.group meta.argument-type storage.modifier */
+/*             ^ meta.function.parameters meta.group meta.argument-type storage.type */
+/*              ^ meta.function.parameters meta.group meta.argument-type storage.modifier.reference */
+void f(const X&*);
+/*         ^ meta.function.parameters meta.group meta.argument-type storage.modifier */
+/*           ^ meta.function.parameters meta.group meta.argument-type */
+/*            ^ meta.function.parameters meta.group meta.argument-type storage.modifier.reference */
+/*             ^ meta.function.parameters meta.group meta.argument-type storage.modifier.pointer */
+void f(X*** x);
+/*     ^ meta.function.parameters meta.group meta.argument-type */
+/*      ^^^ meta.function.parameters meta.group meta.argument-type storage.modifier.pointer */
+/*          ^ meta.function.parameters meta.group variable.parameter */
+void f(X const&);
+/*     ^ meta.function.parameters meta.group meta.argument-type */
+/*           ^ meta.function.parameters meta.group meta.argument-type storage.modifier */
+/*            ^ meta.function.parameters meta.group meta.argument-type storage.modifier.reference */
+void f(X const& x);
+/*     ^ meta.function.parameters meta.group meta.argument-type */
+/*           ^ meta.function.parameters meta.group meta.argument-type storage.modifier */
+/*            ^ meta.function.parameters meta.group meta.argument-type storage.modifier.reference */
+/*              ^ meta.function.parameters meta.group variable.parameter */
+void f(const int x);
+/*         ^ storage.modifier */
+/*             ^ meta.argument-type storage.type */
+/*               ^ variable.parameter */
+void f(int const x);
+/*       ^ meta.argument-type storage.type - variable.parameter */
+/*             ^ storage.modifier */
+/*               ^ variable.parameter */
+void f(int* x);
+/*        ^ storage.modifier */
+/*          ^ variable.parameter */
+void f(const int* x);
+/*              ^ storage.modifier */
+/*                ^ variable.parameter */
+void f(int const*const x, foo y = g(5));
+/*       ^ meta.argument-type storage.type */
+/*             ^ storage.modifier */
+/*              ^ storage.modifier */
+/*               ^ storage.modifier */
+/*                     ^ variable.parameter */
+/*                      ^ punctuation.separator */
+/*                          ^ meta.argument-type - storage.type */
+/*                            ^ variable.parameter */
+/*                              ^ keyword.operator.assignment */
+/*                                ^ meta.function-call variable.function */
+/*                                 ^ meta.function-call meta.group punctuation.section.group.begin */
+/*                                  ^ meta.function-call meta.group constant.numeric */
+/*                                   ^ meta.function-call meta.group punctuation.section.group.end */
+/*                                    ^ punctuation.section.group.end */
+/*                                     ^ punctuation.terminator */
+void f(X const * const x,
+    /* ^ meta.function.parameters meta.group meta.argument-type */
+    /*                 ^ meta.function.parameters meta.group variable.parameter */
+    Y y,
+    /* <- meta.function.parameters meta.group meta.argument-type */
+    /*^ meta.function.parameters meta.group variable.parameter */
+    const Z z
+    /*    ^ meta.function.parameters meta.group meta.argument-type */
+    /*      ^ meta.function.parameters meta.group variable.parameter */
+);
+/* <- meta.function.parameters meta.group punctuation.section.group.end */
+ /* <- punctuation.terminator */
+
+template <class T> void f(
+    T& a,
+    /* <- meta.function.parameters meta.group meta.argument-type */
+     /* <- meta.function.parameters meta.group storage.modifier */
+    /* ^ meta.function.parameters meta.group variable.parameter */
+    const T& b
+    /* <- meta.function.parameters meta.group storage.modifier */
+    /*    ^ meta.function.parameters meta.group meta.argument-type */
+    /*     ^ meta.function.parameters meta.group storage.modifier */
+    /*       ^ meta.function.parameters meta.group variable.parameter */
+);
+/* <- meta.function.parameters meta.group punctuation.section.group.end */
+ /* <- punctuation.terminator */
+template <class T> struct X {};
+struct Y {};
+void f(
+    X<Y>& a,
+    /* <- meta.function.parameters meta.group meta.argument-type */
+    /*^^^ meta.function.parameters meta.group meta.argument-type */
+    /*    ^ variable.parameter - meta.argument-type */
+    const X<Y>& b
+    /* <- meta.function.parameters meta.group meta.argument-type */
+    /*^^^^^^^^^ meta.function.parameters meta.group meta.argument-type */
+    /*          ^ variable.parameter - meta.argument-type */
 );
 
 /////////////////////////////////////////////
@@ -1650,7 +1793,7 @@ int /* comment */ * myfunc
 /*                  ^^^^^^ entity.name.function */
 (int * a)
 /* <- punctuation.section.group.begin */
-/*   ^ keyword.operator */
+/*   ^ storage.modifier */
 /*      ^ punctuation.section.group.end */
 {
 
