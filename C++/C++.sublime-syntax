@@ -846,6 +846,8 @@ contexts:
     - include: modifiers # const, volatile and maybe others.
     - include: brackets # For C-Style arrays.
     - include: function-call # For macros.
+    - match: \b(?:un)?signed\b
+      scope: storage.type.c++
     - match: '{{basic_types}}'
       scope: storage.type.c++
       set: function-definition-params-argument-type-modifiers
