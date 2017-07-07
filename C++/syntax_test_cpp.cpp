@@ -940,16 +940,16 @@ SomeFunction(
 
 void SomeFunction(
     const X x,
-    /*    ^ meta.argument-type */
+    /*    ^ meta.possible-argument-type */
     /*      ^ variable.parameter */
     Y& y,
-    /* <- meta.argument-type */
+    /* <- meta.possible-argument-type */
      /* <- storage.modifier */
     /* ^ variable.parameter */
     const volatile Z* z
     /*  ^ storage.modifier */
     /*           ^ storage.modifier */
-    /*             ^ meta.argument-type */
+    /*             ^ meta.possible-argument-type */
     /*              ^ storage.modifier */
     /*                ^ variable.parameter */
 );
@@ -959,63 +959,63 @@ void SomeFunction(
 struct X{};
 void f(const X x);
 /*     ^ storage.modifier - variable.parameter */
-/*           ^ meta.argument-type */
+/*           ^ meta.possible-argument-type */
 /*             ^ variable.parameter */
 void f(X * const x = 5);
-/*     ^ meta.argument-type - variable.parameter */
+/*     ^ meta.possible-argument-type - variable.parameter */
 /*               ^ variable.parameter */
 /*                 ^ keyword.operator */
 /*                   ^ constant.numeric */
 void f(X& x);
-/*     ^ meta.argument-type - variable.parameter */
+/*     ^ meta.possible-argument-type - variable.parameter */
 /*      ^ storage.modifier */
 /*        ^ variable.parameter */
 void f(const X& x);
 /*         ^ storage.modifier - variable.parameter */
-/*           ^ meta.argument-type */
+/*           ^ meta.possible-argument-type */
 /*            ^ storage.modifier */
 /*              ^ variable.parameter */
 void f(int x);
 /*       ^ storage.type - variable.parameter */
 /*         ^ variable.parameter */
 void f(int);
-/*       ^ meta.function.parameters meta.group meta.argument-type storage.type */
+/*       ^ meta.function.parameters meta.group meta.possible-argument-type storage.type */
 /*        ^ meta.function.parameters meta.group punctuation.section.group.end */
 void f(const int);
-/*         ^ meta.function.parameters meta.group meta.argument-type storage.modifier */
-/*             ^ meta.function.parameters meta.group meta.argument-type storage.type */
+/*         ^ meta.function.parameters meta.group meta.possible-argument-type storage.modifier */
+/*             ^ meta.function.parameters meta.group meta.possible-argument-type storage.type */
 void f(int const*);
-/*       ^ meta.function.parameters meta.group meta.argument-type storage.type */
-/*             ^ meta.function.parameters meta.group meta.argument-type storage.modifier */
-/*              ^ meta.function.parameters meta.group meta.argument-type storage.modifier.pointer */
+/*       ^ meta.function.parameters meta.group meta.possible-argument-type storage.type */
+/*             ^ meta.function.parameters meta.group meta.possible-argument-type storage.modifier */
+/*              ^ meta.function.parameters meta.group meta.possible-argument-type storage.modifier.pointer */
 void f(const int&);
-/*         ^ meta.function.parameters meta.group meta.argument-type storage.modifier */
-/*             ^ meta.function.parameters meta.group meta.argument-type storage.type */
-/*              ^ meta.function.parameters meta.group meta.argument-type storage.modifier.reference */
+/*         ^ meta.function.parameters meta.group meta.possible-argument-type storage.modifier */
+/*             ^ meta.function.parameters meta.group meta.possible-argument-type storage.type */
+/*              ^ meta.function.parameters meta.group meta.possible-argument-type storage.modifier.reference */
 void f(const X&*);
-/*         ^ meta.function.parameters meta.group meta.argument-type storage.modifier */
-/*           ^ meta.function.parameters meta.group meta.argument-type */
-/*            ^ meta.function.parameters meta.group meta.argument-type storage.modifier.reference */
-/*             ^ meta.function.parameters meta.group meta.argument-type storage.modifier.pointer */
+/*         ^ meta.function.parameters meta.group meta.possible-argument-type storage.modifier */
+/*           ^ meta.function.parameters meta.group meta.possible-argument-type */
+/*            ^ meta.function.parameters meta.group meta.possible-argument-type storage.modifier.reference */
+/*             ^ meta.function.parameters meta.group meta.possible-argument-type storage.modifier.pointer */
 void f(X*** x);
-/*     ^ meta.function.parameters meta.group meta.argument-type */
-/*      ^^^ meta.function.parameters meta.group meta.argument-type storage.modifier.pointer */
+/*     ^ meta.function.parameters meta.group meta.possible-argument-type */
+/*      ^^^ meta.function.parameters meta.group meta.possible-argument-type storage.modifier.pointer */
 /*          ^ meta.function.parameters meta.group variable.parameter */
 void f(X const&);
-/*     ^ meta.function.parameters meta.group meta.argument-type */
-/*           ^ meta.function.parameters meta.group meta.argument-type storage.modifier */
-/*            ^ meta.function.parameters meta.group meta.argument-type storage.modifier.reference */
+/*     ^ meta.function.parameters meta.group meta.possible-argument-type */
+/*           ^ meta.function.parameters meta.group meta.possible-argument-type storage.modifier */
+/*            ^ meta.function.parameters meta.group meta.possible-argument-type storage.modifier.reference */
 void f(X const& x);
-/*     ^ meta.function.parameters meta.group meta.argument-type */
-/*           ^ meta.function.parameters meta.group meta.argument-type storage.modifier */
-/*            ^ meta.function.parameters meta.group meta.argument-type storage.modifier.reference */
+/*     ^ meta.function.parameters meta.group meta.possible-argument-type */
+/*           ^ meta.function.parameters meta.group meta.possible-argument-type storage.modifier */
+/*            ^ meta.function.parameters meta.group meta.possible-argument-type storage.modifier.reference */
 /*              ^ meta.function.parameters meta.group variable.parameter */
 void f(const int x);
 /*         ^ storage.modifier */
-/*             ^ meta.argument-type storage.type */
+/*             ^ meta.possible-argument-type storage.type */
 /*               ^ variable.parameter */
 void f(int const x);
-/*       ^ meta.argument-type storage.type - variable.parameter */
+/*       ^ meta.possible-argument-type storage.type - variable.parameter */
 /*             ^ storage.modifier */
 /*               ^ variable.parameter */
 void f(int* x);
@@ -1025,13 +1025,13 @@ void f(const int* x);
 /*              ^ storage.modifier */
 /*                ^ variable.parameter */
 void f(int const*const x, foo y = g(5));
-/*       ^ meta.argument-type storage.type */
+/*       ^ meta.possible-argument-type storage.type */
 /*             ^ storage.modifier */
 /*              ^ storage.modifier */
 /*               ^ storage.modifier */
 /*                     ^ variable.parameter */
 /*                      ^ punctuation.separator */
-/*                          ^ meta.argument-type - storage.type */
+/*                          ^ meta.possible-argument-type - storage.type */
 /*                            ^ variable.parameter */
 /*                              ^ keyword.operator.assignment */
 /*                                ^ meta.function-call variable.function */
@@ -1041,26 +1041,55 @@ void f(int const*const x, foo y = g(5));
 /*                                    ^ punctuation.section.group.end */
 /*                                     ^ punctuation.terminator */
 void f(X const * const x,
-    /* ^ meta.function.parameters meta.group meta.argument-type */
+    /* ^ meta.function.parameters meta.group meta.possible-argument-type */
     /*                 ^ meta.function.parameters meta.group variable.parameter */
     Y y,
-    /* <- meta.function.parameters meta.group meta.argument-type */
+    /* <- meta.function.parameters meta.group meta.possible-argument-type */
     /*^ meta.function.parameters meta.group variable.parameter */
     const Z z
-    /*    ^ meta.function.parameters meta.group meta.argument-type */
+    /*    ^ meta.function.parameters meta.group meta.possible-argument-type */
     /*      ^ meta.function.parameters meta.group variable.parameter */
 );
 /* <- meta.function.parameters meta.group punctuation.section.group.end */
  /* <- punctuation.terminator */
 
+SomeType globalVar{bar() + otherGlobalVar};
+/*                       ^ keyword.operator */
+SomeType globalVar(bar() + otherGlobalVar);
+/*                       ^ keyword.operator */
+SomeType globalVar = bar() + otherGlobalVar;
+/*                         ^ keyword.operator */
+SomeType globalVar(42);
+/*                 ^^ constant.numeric */
+SomeType globalVar(x + 10);
+/*                   ^ keyword.operator */
+SomeType globalVar(x - 2);
+/*                   ^ keyword.operator */
+SomeType globalVar(x % 2);
+/*                   ^ keyword.operator */
+SomeType globalVar(x ^ 2);
+/*                   ^ keyword.operator */
+SomeType globalVar(x * 2);
+/*                   ^ keyword.operator */
+static SomeType globalVar{bar() + otherGlobalVar};
+/*                              ^ keyword.operator */
+static SomeType globalVar(bar() + otherGlobalVar);
+/*                              ^ keyword.operator */
+static SomeType globalVar = bar() + otherGlobalVar;
+/*                                ^ keyword.operator */
+static SomeType globalVar(42);
+/*                        ^^ constant.numeric */
+static SomeType globalVar(x / 10);
+/*                          ^ keyword.operator */
+
 template <class T> void f(
     T& a,
-    /* <- meta.function.parameters meta.group meta.argument-type */
+    /* <- meta.function.parameters meta.group meta.possible-argument-type */
      /* <- meta.function.parameters meta.group storage.modifier */
     /* ^ meta.function.parameters meta.group variable.parameter */
     const T& b
     /* <- meta.function.parameters meta.group storage.modifier */
-    /*    ^ meta.function.parameters meta.group meta.argument-type */
+    /*    ^ meta.function.parameters meta.group meta.possible-argument-type */
     /*     ^ meta.function.parameters meta.group storage.modifier */
     /*       ^ meta.function.parameters meta.group variable.parameter */
 );
@@ -1070,13 +1099,13 @@ template <class T> struct X {};
 struct Y {};
 void f(
     X<Y>& a,
-    /* <- meta.function.parameters meta.group meta.argument-type */
-    /*^^^ meta.function.parameters meta.group meta.argument-type */
-    /*    ^ variable.parameter - meta.argument-type */
+    /* <- meta.function.parameters meta.group meta.possible-argument-type */
+    /*^^^ meta.function.parameters meta.group meta.possible-argument-type */
+    /*    ^ variable.parameter - meta.possible-argument-type */
     const X<Y>& b
-    /* <- meta.function.parameters meta.group meta.argument-type */
-    /*^^^^^^^^^ meta.function.parameters meta.group meta.argument-type */
-    /*          ^ variable.parameter - meta.argument-type */
+    /* <- meta.function.parameters meta.group meta.possible-argument-type */
+    /*^^^^^^^^^ meta.function.parameters meta.group meta.possible-argument-type */
+    /*          ^ variable.parameter - meta.possible-argument-type */
 );
 
 /////////////////////////////////////////////

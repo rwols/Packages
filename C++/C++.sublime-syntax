@@ -817,9 +817,32 @@ contexts:
           scope: punctuation.section.group.end.c++
           set: function-definition-continue
 
+  function-definition-params-invalid-tokens-check:
+    # If we encounter any of these tokens while we are expecting a type, then 
+    # that means that we were wrong to assume this was a function, and it's
+    # actually a variable that we're declaring.
+    - match: |
+        (?x)                  # ignore whitespace in this regex
+        (?=                   # look ahead for
+            \s*               # whitespace
+                (?:           # followed by any of
+                      [+%\-^] # +, -, % or ^. Note that * and & can mean a type modifier
+                    | /(?!\*) # or / not followed by *
+                    | \d      # or a digit
+                )             # end of non-capture group
+        )                     # end of look ahead
+      set:
+        - meta_content_scope: meta.function.parameters.c++ meta.group.c++
+        - include: function-definition-params-exit
+        - include: expressions-minus-generic-type
+
   function-definition-params-argument-type:
-    - meta_content_scope: meta.function.parameters.c++ meta.group.c++ meta.argument-type.c++
+    - meta_content_scope:
+        meta.function.parameters.c++ 
+        meta.group.c++ 
+        meta.possible-argument-type.c++
     - include: function-definition-params-exit
+    - include: function-definition-params-invalid-tokens-check
     - include: modifiers # const, volatile and maybe others.
     - include: brackets # For C-Style arrays.
     - include: function-call # For macros.
@@ -828,19 +851,14 @@ contexts:
       set: function-definition-params-argument-type-modifiers
     - match: '{{identifier}}'
       set: function-definition-params-argument-type-modifiers
-    # At this point one could detect invalid storage modifiers now, but I'll
-    # leave it commented because macros might get in the way.
-    # - match: '[*&]'
-    #   scope: invalid.illegal.stray-modifiers.c++
-    # The comma is handled in function-definition-params-argument-name-maybe-assignment,
-    # so it's possible to detect a stray comma now. I'll leave this commented
-    # because macros might get in the way of parsing.
-    # - match: ','
-    #   scope: invalid.illegal.stray-comma.c++
 
   function-definition-params-argument-type-modifiers:
-    - meta_content_scope: meta.function.parameters.c++ meta.group.c++ meta.argument-type.c++
+    - meta_content_scope: 
+        meta.function.parameters.c++ 
+        meta.group.c++ 
+        meta.possible-argument-type.c++
     - include: function-definition-params-exit
+    - include: function-definition-params-invalid-tokens-check
     - include: modifiers # const, volatile and maybe others.
     - include: function-call # For macros.
     - include: angle-brackets # For template argument types.
