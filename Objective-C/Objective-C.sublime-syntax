@@ -613,11 +613,10 @@ contexts:
             - match : \)
               scope: punctuation.section.group.end.objc
               set: function-definition-continue
-            - match: '\bvoid\b'
-              scope: storage.type.objc
-            - match: '{{identifier}}(?=\s*(\[|,|\)))'
-              scope: variable.parameter.objc
             - include: expressions
+            # Don't do a lookahead for a "," or a ")" as it's unreliable
+            - match: '{{identifier}}'
+              scope: variable.parameter.objc
     - match: (?=\S)
       pop: true
 

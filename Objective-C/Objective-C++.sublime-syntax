@@ -907,9 +907,10 @@ contexts:
             - match : \)
               scope: punctuation.section.group.end.objc++
               set: function-definition-continue
-            - match: '\bvoid\b'
-              scope: storage.type.objc++
-            - match: '{{identifier}}(?=\s*(\[|,|\)|=))'
+            - include: types
+            - include: function-call
+            # Don't do a lookahead for a "," or a ")" as it's unreliable
+            - match: '{{identifier}}'
               scope: variable.parameter.objc++
             - match: '='
               scope: keyword.operator.assignment.objc++

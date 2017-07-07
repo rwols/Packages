@@ -345,6 +345,23 @@ int /* comment */ * myfunc
 /* <- meta.function meta.block punctuation.section.block.begin */
 }
 
+void f(int x);
+/*         ^ variable.parameter */
+
+void 
+f(
+    int x
+    /*  ^ variable.parameter */
+);
+
+void 
+SomeFunction(
+    int someInt,
+    bool someBool,
+    float someFloat
+    /*    ^ variable.parameter */
+);
+
 MACRO1
 RETURN_TYPE
 /* <- - entity.name.function */

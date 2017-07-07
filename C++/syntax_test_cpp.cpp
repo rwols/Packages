@@ -919,6 +919,23 @@ long double operator "" _km (long double x);
 /*                          ^^^^^^^^^^^^^^^ meta.function.parameters */
 /*          ^^^^^^^^^^^^^^^ entity.name.function */
 
+void f(int x);
+/*         ^ variable.parameter */
+
+void 
+f(
+    int x
+    /*  ^ variable.parameter */
+);
+
+void 
+SomeFunction(
+    int someInt,
+    bool someBool,
+    float someFloat
+    /*    ^ variable.parameter */
+);
+
 /////////////////////////////////////////////
 // Namespace
 /////////////////////////////////////////////
