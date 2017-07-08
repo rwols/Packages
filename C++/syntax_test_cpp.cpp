@@ -1000,6 +1000,17 @@ void f(unsigned char& x);
 /*                 ^ storage.type - variable.parameter */
 /*                  ^ storage.modifier */
 /*                    ^ variable.parameter */
+void f(unsigned x);
+/*            ^ meta.possible-argument-type. storage.type. */
+/*              ^ variable.parameter - meta.possible-argument-type */
+void f(signed x);
+/*          ^ meta.possible-argument-type. storage.type. */
+/*            ^ variable.parameter - meta.possible-argument-type */
+void f(const unsigned& x);
+/*         ^ meta.possible-argument-type storage.modifier */
+/*                  ^ meta.possible-argument-type storage.type */
+/*                   ^ meta.possible-argument-type storage.modifier */
+/*                     ^ variable.parameter - meta.possible-argument-type */
 void f(int);
 /*       ^ meta.function.parameters meta.group meta.possible-argument-type storage.type */
 /*        ^ meta.function.parameters meta.group punctuation.section.group.end */
@@ -1091,11 +1102,13 @@ SomeType globalVar(x % 2);
 /*                   ^ keyword.operator */
 SomeType globalVar(x ^ 2);
 /*                   ^ keyword.operator */
+
 // Well what do we do here? We're optimistic and assume it's a function, but
 // now the asterisk actually means "multiplication". I'll keep it as
 // storage.modifier for now.
 SomeType globalVar(x * 2);
 /*                   ^ storage.modifier */
+
 static SomeType globalVar{bar() + otherGlobalVar};
 /*                              ^ keyword.operator */
 static SomeType globalVar(bar() + otherGlobalVar);
