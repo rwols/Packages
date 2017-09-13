@@ -455,7 +455,7 @@ contexts:
 
   template-common:
     # Exit the template scope if we hit some basic invalid characters. This
-    # helps when a user is in the middle of typing their template types and 
+    # helps when a user is in the middle of typing their template types and
     # prevents re-highlighting the whole file until the next > is found.
     - match: (?=[{};])
       pop: true
@@ -1410,7 +1410,7 @@ contexts:
     - include: preprocessor-rule-other-statements
 
   preprocessor-expressions:
-    - include: scope:source.c#incomplete-inc
+    # - include: scope:source.c#incomplete-inc
     - include: preprocessor-macro-define
     - include: scope:source.c#pragma-mark
     - include: preprocessor-other

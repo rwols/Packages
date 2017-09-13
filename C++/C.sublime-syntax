@@ -160,9 +160,7 @@ contexts:
     - match: '\b((0(x|X)[0-9a-fA-F]*(\.[0-9a-fA-F]+p-?\d+)?)|(([0-9]+\.?[0-9]*)|(\.[0-9]+))((e|E)(\+|-)?[0-9]+)?)([fF]|(l{1,2}|L{1,2})[uU]?|[uU](l{0,2}|L{0,2}))?\b'
       scope: constant.numeric.c
 
-  operators:
-    - match: '->'
-      scope: punctuation.accessor.c
+  operators-without-accessor:
     - match: \+\=|-\=|\*\=|/\=|%\=|&\=|\|\=|\^\=|>>\=|<<\=
       scope: keyword.operator.assignment.augmented.c
     - match: \+|\-|/|%|<<|>>|&&|\|\||\||\^|~|!
@@ -179,6 +177,11 @@ contexts:
       scope: keyword.operator.ternary.c
     - match: '\.\.\.'
       scope: keyword.operator.variadic.c
+
+  operators:
+    - match: '->'
+      scope: punctuation.accessor.c
+    - include: operators-without-accessor
 
   access:
     - match: '(\.)({{identifier}})(?!\s*\()'
@@ -255,9 +258,19 @@ contexts:
         3: meta.toc-list.pragma-mark.c
 
   # Used by "inc" snippets to prevent double ##include
-  incomplete-inc:
-    - match: '^\s*(#i(nc?)?)\b\s*'
-      scope: meta.preprocessor.incomplete.c
+  preprocessor-incomplete:
+    - match: ^\s*(#)i(nc?)?\b\s*
+      captures:
+        0: meta.preprocessor.incomplete.c
+        1: keyword.control.import.incomplete.c
+    - match: ^\s*(#)
+      captures:
+        0: meta.preprocessor.unknown.c
+        1: keyword.control.import.unknown.c
+      push:
+        - include: preprocessor-line-continuation
+        - include: preprocessor-line-ending
+        - include: preprocessor-comments
 
   #############################################################################
   # The following are C-specific scopes that should not be reused. This is
@@ -717,10 +730,10 @@ contexts:
     - include: preprocessor-rule-other-statements
 
   preprocessor-expressions:
-    - include: incomplete-inc
     - include: preprocessor-macro-define
     - include: pragma-mark
     - include: preprocessor-other
+    - include: preprocessor-incomplete
 
   preprocessor-rule-disabled-global:
     - match: ^\s*((#if)\s+(0))\b
@@ -784,8 +797,7 @@ contexts:
         - meta_scope: meta.preprocessor.c
         - include: preprocessor-line-continuation
         - include: preprocessor-comments
-        - match: \bdefined\b
-          scope: keyword.control.c
+        - include: preprocessor-if-expression
         # Enter a new scope where all elif/else branches have their
         # contexts popped by a subsequent elif/else/endif. This ensures that
         # preprocessor branches don't push multiple meta.block scopes on
@@ -914,8 +926,7 @@ contexts:
         - meta_scope: meta.preprocessor.c
         - include: preprocessor-line-continuation
         - include: preprocessor-comments
-        - match: \bdefined\b
-          scope: keyword.control.c
+        - include: preprocessor-if-expression
         # Enter a new scope where all elif/else branches have their
         # contexts popped by a subsequent elif/else/endif. This ensures that
         # preprocessor branches don't push multiple meta.block scopes on
@@ -923,6 +934,25 @@ contexts:
         # functions.
         - match: $\n
           set: preprocessor-if-branch-statements
+
+  preprocessor-if-expression:
+    - match: \bdefined\b
+      scope: keyword.control.c
+      push:
+        - match: \(
+          scope: punctuation.section.parens.begin.c
+          set:
+            - match: \b{{identifier}}\b
+              scope: variable.other.constant.macro.c
+            - match: \)
+              scope: punctuation.section.parens.end.c
+              pop: true
+        - match: \b{{identifier}}\b
+          scope: variable.other.constant.macro.c
+          pop: true
+    - include: function-call
+    - include: numbers
+    - include: operators-without-accessor
 
   # These gymnastics here ensure that we are properly handling scope even
   # when the preprocessor is used to create different scope beginnings, such
@@ -1089,11 +1119,17 @@ contexts:
     - include: preprocessor-line-ending
     - include: preprocessor-comments
     # Don't define blocks in define statements
-    - match: '\{'
-      scope: punctuation.section.block.begin.c
-    - match: '\}'
-      scope: punctuation.section.block.end.c
-    - include: expressions
+    # - match: '\{'
+    #   scope: punctuation.section.block.begin.c
+    # - match: '\}'
+    #   scope: punctuation.section.block.end.c
+    # - include: expressions
+    - match: '##'
+      scope: keyword.operator.paste.c
+    - match: '#@'
+      scope: keyword.operator.microsoft.charify.c
+    - match: '#'
+      scope: keyword.operator.stringify.c
 
   preprocessor-other:
     - match: ^\s*(#\s*(?:if|ifdef|ifndef|elif|else|line|pragma|undef))\b
@@ -1104,8 +1140,7 @@ contexts:
         - include: preprocessor-line-continuation
         - include: preprocessor-line-ending
         - include: preprocessor-comments
-        - match: \bdefined\b
-          scope: keyword.control.c
+        - include: preprocessor-if-expression
     - match: ^\s*(#\s*endif)\b
       captures:
         1: meta.preprocessor.c keyword.control.import.c
