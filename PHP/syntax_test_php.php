@@ -354,7 +354,7 @@ func_call(true, 1, "string");
 //                         ^ punctuation.section.group.end
 //        ^^^^ constant.language
 //            ^ punctuation.separator.php
-//              ^ constant.numeric
+//              ^ constant.numeric.integer.decimal
 //               ^ punctuation.separator.php
 //                 ^^^^^^^^ string.quoted.double
 
@@ -425,6 +425,16 @@ $anon = new class extends Test1 implements Countable {};
 //                                     ^ support.other.namespace.php
 //                                                 ^ support.class.php
 
+    function nullableReturnType(?int $param1): ?bool {}
+//  ^ storage.type.function.php
+//           ^ entity.name.function.php
+//                             ^ punctuation.section.group.begin.php
+//                              ^ storage.type.nullable.php
+//                               ^ meta.function.parameters
+//                                          ^ punctuation.section.group.end.php
+//                                             ^ storage.type.nullable.php
+//                                              ^ storage.type.php
+
 $test = "\0 \12 \345g \x0f \u{a} \u{9999} \u{999}";
 //       ^^ constant.character.escape.octal.php
 //          ^^^ constant.character.escape.octal.php
@@ -452,7 +462,7 @@ $test = "\0 \12 \345g \x0f \u{a} \u{9999} \u{999}";
 //                                    ^^ variable.other
 //                                    ^ punctuation.definition.variable
 //                                      ^ punctuation.section.brackets.begin
-//                                       ^ constant.numeric
+//                                       ^ constant.numeric.integer.decimal
 //                                        ^ punctuation.section.brackets.end
 //                                                      ^^ variable.other
 //                                                      ^ punctuation.definition.variable
@@ -560,6 +570,20 @@ class B
         echo B::class;
 //              ^ constant.class
 
+        echo $this->pro1::FOO;
+//           ^^^^^ variable.language
+//                ^^ punctuation.accessor
+//                  ^^^^ variable.other.member
+//                      ^^ punctuation.accessor
+//                        ^^^ constant.other.class
+
+        echo $this->pro1::bar();
+//           ^^^^^ variable.language
+//                ^^ punctuation.accessor
+//                  ^^^^ variable.other.member
+//                      ^^ punctuation.accessor
+//                        ^^^ variable.function
+
         parent::abc($var, $var2, $var3);
 //      ^^^^^^ variable.language
 //            ^^ punctuation.accessor
@@ -592,6 +616,9 @@ try {
 //             ^^^^^^ support.other.namespace.php
 //                   ^ punctuation.separator.namespace.php
 //                    ^^^^^^^^^ support.class
+} catch (/* comment */ ExceptionExample $e) {
+//       ^^^^^^^^^^^^^ comment.block
+    echo 'Caught exception: ', $e->getMessage(), "\n";
 } catch (Exception $e) {
 //^ keyword.control.exception
 //       ^^^^^^^^^ meta.path.php
@@ -614,6 +641,21 @@ try {
 //               ^^^^^^^^^ support.class.exception.php
 //                         ^^ variable.other.php
     echo 'Caught exception: ', $e->getMessage(), "\n";
+} catch (\Custom\Exception1 | \Custom\Exception2 $e) {
+//^ keyword.control.exception
+//       ^^^^^^^^^^^^^^^^^ meta.path.php
+//       ^ punctuation.separator.namespace.php
+//        ^^^^^^ support.other.namespace.php
+//              ^ punctuation.separator.namespace.php
+//               ^^^^^^^^^^ support.class.exception.php
+//                          ^ punctuation.separator.catch.php
+//                            ^^^^^^^^^^^^^^^^^ meta.path.php
+//                            ^ punctuation.separator.namespace.php
+//                             ^^^^^^ support.other.namespace.php
+//                                   ^ punctuation.separator.namespace.php
+//                                    ^^^^^^^^^^ support.class.exception.php
+//                                               ^^ variable.other.php
+    echo 'Caught exception: ', $e->getMessage(), "\n";
 } finally {
 //^ keyword.control.exception
     echo "First finally.\n";
@@ -626,19 +668,52 @@ function generate()
 }
 
 $var = 0;
-//     ^ constant.numeric
+//     ^ constant.numeric.integer.decimal
 
 $var2 = -123.456e10;
-//       ^^^^^^^^^^ constant.numeric
+//       ^^^^^^^^^^ constant.numeric.float.decimal
+
+$var2 = -123.e10;
+//       ^^^^^^^ constant.numeric.float.decimal
+
+$var2 = -.123e10;
+//       ^^^^^^^ constant.numeric.float.decimal
+
+$var2 = -123e10;
+//       ^^^^^^ constant.numeric.float.decimal
 
 $var3 = 0x0f;
-//      ^^^^ constant.numeric
+//      ^^^^ constant.numeric.integer.hexadecimal
+//      ^^ punctuation.definition.numeric.hexadecimal
 
 $var4 = 0b0111;
-//      ^^^^^^ constant.numeric
+//      ^^^^^^ constant.numeric.integer.binary
+//      ^^ punctuation.definition.numeric.binary
 
   foo_bar:
 //^^^^^^^ entity.name.label.php - keyword.control.php
+
+if ((include 'vars.php') == TRUE) {
+//   ^^^^^^^ keyword.control.import.include.php
+//   ^^^^^^^^^^^^^^^^^^ meta.include.php
+//                     ^ - meta.include.php
+}
+
+// evaluated as include(('vars.php') == TRUE), i.e. include('')
+if (include('vars.php') == TRUE) {
+//  ^^^^^^^^^^^^^^^^^^^^^^^^^^^ meta.include.php
+//                             ^ - meta.include.php
+}
+
+$a += .5;
+// ^^ keyword.operator.assignment.augmented.php
+//    ^^ constant.numeric
+
+$a .= 1;
+// ^^ keyword.operator.assignment.augmented.php
+
+if ($a !== $b);
+//     ^^^ keyword.operator.comparison.php
 
 if ():
 else:
@@ -730,7 +805,7 @@ EOT;
 
 echo <<<'EOT'
 //   ^^^^^^^^ punctuation.definition.string
-//       ^^^ keyword.operator.heredoc
+//      ^^^^^ keyword.operator.nowdoc
 This is a test! $var
 //^^^^^^^^^^^^^^^^^^ string.unquoted.nowdoc
 //              ^^^^ - variable.other
@@ -749,6 +824,8 @@ This is a test!
 //         ^^^^^^^^^ string.quoted.double
 HTML;
 // <- punctuation.section.embedded.end keyword.operator.heredoc
+//  ^ punctuation.terminator.expression
+//   ^ meta.heredoc-end
 
 echo <<< JAVASCRIPT
 //   ^^^^^^^^^^^^^^ punctuation.section.embedded.begin punctuation.definition.string
@@ -786,6 +863,20 @@ SELECT * FROM users WHERE first_name = 'John'
 //                                     ^^^^^^ string.quoted.single
 SQL;
 // <- punctuation.section.embedded.end keyword.operator.heredoc
+
+
+echo <<<'SQL'
+//   ^^^^^^^^ punctuation.section.embedded.begin punctuation.definition.string
+//      ^^^^^ keyword.operator.nowdoc
+SELECT * FROM users WHERE first_name = 'John'\n
+//^^^^^^^^^^^^^^^^^^^^^^^^ meta.embedded.sql source.sql
+// <- keyword.other.DML
+//     ^ keyword.operator.star
+//                                     ^^^^^^ string.quoted.single
+//                                           ^^^ - constant.character.escape.php
+SQL;
+// <- punctuation.section.embedded.end
+
 
 
 class OutputsHtml {
