@@ -856,3 +856,25 @@ target2:
 	@# # Regular Message
 	#^ comment - variable
 	@FeedProcessorSIAC -origin CTS -decodeData "binData"
+
+OUTFILE=testoutput.txt
+.PHONY: target
+target:
+	@echo test1 >> $(OUTFILE)
+	# Test that Make expansions are still happening inside shell comments.
+	# $(shell echo test2 >> $(OUTFILE))
+	# ^^ keyword.other
+	#                       ^^ keyword.other
+	#                                ^^ keyword.other
+#	$(shell echo test3 >> $(OUTFILE))
+#^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ - keyword.other
+
+foo:
+	@echo hello, world!
+	# <- constant.language
+	@# $(shell touch foo.txt)
+	# <- constant.language
+	#^^ comment.line
+	#  ^^ keyword.other
+	#    ^ support.function
+	#                       ^ keyword.other
